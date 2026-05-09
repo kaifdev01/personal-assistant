@@ -7,7 +7,8 @@ import { Moon, BookOpen, Flame, CheckCircle } from "lucide-react";
 
 export default function Prayer() {
   const { state, dispatch } = useApp();
-  const { completed, total, percentage } = usePrayerStats();
+  const { completed, total } = usePrayerStats();
+  const percentage = Math.round((completed / total) * 100);
 
   const weeklyPrayerAvg = Math.round(
     WEEKLY_STATS.reduce((sum, d) => sum + d.prayers, 0) / WEEKLY_STATS.length

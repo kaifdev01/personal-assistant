@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { Card, Badge, ProgressBar, CircularProgress, Modal } from "../components/ui";
-import { Utensils, Plus, Trash2, TrendingUp, Target, Flame, Search, Sparkles, AlertCircle, Lightbulb } from "lucide-react";
+import { Utensils, Plus, Trash2, TrendingUp, Target, Search, Sparkles, AlertCircle, Lightbulb } from "lucide-react";
 
 // Comprehensive food database with calories and macros per 100g or per serving
 const FOOD_DATABASE = {
@@ -81,7 +81,6 @@ const FOOD_DATABASE = {
   "Pizza (1 slice)": { calories: 285, protein: 12, carbs: 36, fats: 10 },
   "Burger (1 piece)": { calories: 354, protein: 17, carbs: 30, fats: 18 },
   "Fries (medium)": { calories: 365, protein: 4, carbs: 48, fats: 17 },
-  "Biryani (1 plate)": { calories: 500, protein: 20, carbs: 60, fats: 18 },
   "Sandwich (1 piece)": { calories: 200, protein: 8, carbs: 25, fats: 7 },
 };
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
-import { Card, Badge, ProgressBar, CircularProgress, Modal, EmptyState } from "../components/ui";
+import { Card, Badge, ProgressBar, CircularProgress, Modal } from "../components/ui";
 import { useTimer } from "../hooks/useStats";
 import { HOME_WORKOUTS } from "../data/mockData";
 import { Dumbbell, Timer, Droplets, Scale, Flame, Play, Pause, RotateCcw, ChevronDown, ChevronUp, Calendar, ChevronLeft, ChevronRight } from "lucide-react";

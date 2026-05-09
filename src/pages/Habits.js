@@ -3,7 +3,7 @@ import { useApp } from "../context/AppContext";
 import { Card, ProgressBar, CircularProgress, Badge } from "../components/ui";
 import { useHabitToday } from "../hooks/useStats";
 import { HABITS, WEEKLY_STATS } from "../data/mockData";
-import { Activity, TrendingUp, Calendar, Award, Target, Zap, ChevronRight } from "lucide-react";
+import { Activity, TrendingUp, Calendar, Award, Target, Zap } from "lucide-react";
 
 export default function Habits() {
   const { state, dispatch } = useApp();

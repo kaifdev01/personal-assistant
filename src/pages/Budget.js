@@ -19,9 +19,11 @@ export default function Budget() {
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [budgetInput, setBudgetInput] = useState(Number(state.monthlyBudget) || 15000);
 
-  const transactions = Array.isArray(state.budgetTransactions)
-    ? state.budgetTransactions.filter(t => t && typeof t === "object" && t.id)
-    : [];
+  const transactions = useMemo(() =>
+    Array.isArray(state.budgetTransactions)
+      ? state.budgetTransactions.filter(t => t && typeof t === "object" && t.id)
+      : [],
+  [state.budgetTransactions]);
   const monthlyBudget = Number(state.monthlyBudget) || 15000;
 
   // Filter by selected month
