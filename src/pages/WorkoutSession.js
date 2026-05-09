@@ -33,18 +33,18 @@ export default function WorkoutSession() {
     }
   }, [restTimer.seconds, restTimer.running, phase]);
 
-  if (!workout || !workout.exercises || workout.exercises.length === 0) return null;
-
-  const currentExercise = workout.exercises[currentExerciseIndex];
-  const exerciseData = EXERCISE_LIBRARY[currentExercise.name] || {};
-  const totalExercises = workout.exercises.length;
-  const progress = ((currentExerciseIndex + (currentSet / parseInt(currentExercise.sets))) / totalExercises) * 100;
+  const currentExercise = workout?.exercises?.[currentExerciseIndex];
+  const exerciseData = EXERCISE_LIBRARY[(currentExercise?.name)] || {};
+  const totalExercises = workout?.exercises?.length || 0;
+  const progress = currentExercise
+    ? ((currentExerciseIndex + (currentSet / parseInt(currentExercise.sets))) / totalExercises) * 100
+    : 0;
 
   // Auto-complete set when time-based exercise duration is reached
   useEffect(() => {
+    if (!currentExercise) return;
     if (phase === "exercise" && exerciseTimer.running) {
       const reps = currentExercise.reps;
-      // Check if reps is time-based (e.g., "30 sec", "45 sec")
       const timeMatch = reps.match(/(\d+)\s*sec/);
       if (timeMatch) {
         const targetSeconds = parseInt(timeMatch[1]);
@@ -53,7 +53,9 @@ export default function WorkoutSession() {
         }
       }
     }
-  }, [exerciseTimer.seconds, phase, exerciseTimer.running]);
+  }, [exerciseTimer.seconds, phase, exerciseTimer.running, currentExercise]);
+
+  if (!workout || !workout.exercises || workout.exercises.length === 0) return null;
 
   function startExercise() {
     setPhase("exercise");
