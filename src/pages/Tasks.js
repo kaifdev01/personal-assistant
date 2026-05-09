@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
-import { Card, Badge, Modal, EmptyState } from "../components/ui";
+import { Card, Modal, EmptyState } from "../components/ui";
 import { useTaskStats } from "../hooks/useStats";
 import { CATEGORY_COLORS, PRIORITY_COLORS } from "../data/mockData";
 import { Plus, Trash2, Edit2, CheckCircle, Circle, Filter } from "lucide-react";

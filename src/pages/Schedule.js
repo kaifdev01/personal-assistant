@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card, Badge } from "../components/ui";
 import { SCHEDULE } from "../data/mockData";
-import { Calendar, Clock, Sun, Moon, AlertTriangle } from "lucide-react";
+import { Calendar, Clock, Sun, AlertTriangle } from "lucide-react";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const TYPE_COLORS = {

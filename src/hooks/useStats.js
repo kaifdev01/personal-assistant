@@ -6,7 +6,8 @@ export function usePrayerStats() {
   const { state } = useApp();
   const completed = Object.values(state.prayers).filter(Boolean).length;
   const total = 5;
-  return { completed, total, percentage: Math.round((completed / total) * 100) };
+  const percentage = Math.round((completed / total) * 100);
+  return { completed, total, percentage };
 }
 
 // Returns task stats for today

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { CircularProgress, Badge } from "../components/ui";
 import { useTimer } from "../hooks/useStats";
 import { EXERCISE_LIBRARY } from "../data/exerciseLibrary";
-import { Play, Pause, SkipForward, X, CheckCircle, RotateCcw, Flame, Target, Lightbulb, AlertCircle } from "lucide-react";
+import { Play, Pause, SkipForward, X, CheckCircle, Flame, Target, Lightbulb, AlertCircle } from "lucide-react";
 
 export default function WorkoutSession() {
   const navigate = useNavigate();
@@ -14,12 +14,19 @@ export default function WorkoutSession() {
 
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSet, setCurrentSet] = useState(1);
-  const [phase, setPhase] = useState("ready"); // ready, exercise, rest, complete
+  const [phase, setPhase] = useState("ready");
   const [sessionStartTime] = useState(Date.now());
   const [completedExercises, setCompletedExercises] = useState([]);
 
   const exerciseTimer = useTimer(0, false);
   const restTimer = useTimer(30, true);
+
+  const totalExercises = workout?.exercises?.length || 0;
+  const currentExercise = workout?.exercises?.[currentExerciseIndex];
+  const exerciseData = EXERCISE_LIBRARY[currentExercise?.name] || {};
+  const progress = currentExercise
+    ? ((currentExerciseIndex + currentSet / parseInt(currentExercise.sets)) / totalExercises) * 100
+    : 0;
 
   useEffect(() => {
     if (!workout || !workout.exercises || workout.exercises.length === 0) {
@@ -27,33 +34,52 @@ export default function WorkoutSession() {
     }
   }, [workout, navigate]);
 
+  const finishWorkout = useCallback(() => {
+    dispatch({ type: "SET_WORKOUT_DONE", value: true, calories: workout?.calories });
+    setPhase("complete");
+    exerciseTimer.pause();
+    restTimer.pause();
+  }, [dispatch, workout, exerciseTimer, restTimer]);
+
+  const handleNextSet = useCallback(() => {
+    restTimer.pause();
+    setCurrentSet(s => s + 1);
+    setPhase("ready");
+  }, [restTimer]);
+
+  const completeSet = useCallback(() => {
+    exerciseTimer.pause();
+    setCompletedExercises(prev => [...prev, { exercise: currentExercise?.name, set: currentSet }]);
+    if (currentSet < parseInt(currentExercise?.sets || 1)) {
+      setPhase("rest");
+      const restSecs = currentExercise?.rest ? parseInt(currentExercise.rest.replace(/\D/g, "")) || 30 : 30;
+      restTimer.reset(restSecs);
+      restTimer.start();
+    } else {
+      if (currentExerciseIndex < totalExercises - 1) {
+        setCurrentExerciseIndex(i => i + 1);
+        setCurrentSet(1);
+        setPhase("ready");
+        exerciseTimer.reset(0);
+      } else {
+        finishWorkout();
+      }
+    }
+  }, [currentExercise, currentSet, currentExerciseIndex, totalExercises, exerciseTimer, restTimer, finishWorkout]);
+
   useEffect(() => {
     if (phase === "rest" && restTimer.seconds === 0 && restTimer.running) {
       handleNextSet();
     }
-  }, [restTimer.seconds, restTimer.running, phase]);
+  }, [restTimer.seconds, restTimer.running, phase, handleNextSet]);
 
-  const currentExercise = workout?.exercises?.[currentExerciseIndex];
-  const exerciseData = EXERCISE_LIBRARY[(currentExercise?.name)] || {};
-  const totalExercises = workout?.exercises?.length || 0;
-  const progress = currentExercise
-    ? ((currentExerciseIndex + (currentSet / parseInt(currentExercise.sets))) / totalExercises) * 100
-    : 0;
-
-  // Auto-complete set when time-based exercise duration is reached
   useEffect(() => {
-    if (!currentExercise) return;
-    if (phase === "exercise" && exerciseTimer.running) {
-      const reps = currentExercise.reps;
-      const timeMatch = reps.match(/(\d+)\s*sec/);
-      if (timeMatch) {
-        const targetSeconds = parseInt(timeMatch[1]);
-        if (exerciseTimer.seconds >= targetSeconds) {
-          completeSet();
-        }
-      }
+    if (!currentExercise || phase !== "exercise" || !exerciseTimer.running) return;
+    const timeMatch = currentExercise.reps.match(/(\d+)\s*sec/);
+    if (timeMatch && exerciseTimer.seconds >= parseInt(timeMatch[1])) {
+      completeSet();
     }
-  }, [exerciseTimer.seconds, phase, exerciseTimer.running, currentExercise]);
+  }, [exerciseTimer.seconds, phase, exerciseTimer.running, currentExercise, completeSet]);
 
   if (!workout || !workout.exercises || workout.exercises.length === 0) return null;
 
@@ -63,39 +89,9 @@ export default function WorkoutSession() {
     exerciseTimer.start();
   }
 
-  function completeSet() {
-    exerciseTimer.pause();
-    setCompletedExercises([...completedExercises, { exercise: currentExercise.name, set: currentSet }]);
-    
-    if (currentSet < parseInt(currentExercise.sets)) {
-      // More sets remaining - go to rest
-      setPhase("rest");
-      const restSeconds = currentExercise.rest ? parseInt(currentExercise.rest.replace(/\D/g, "")) || 30 : 30;
-      restTimer.reset(restSeconds);
-      restTimer.start();
-    } else {
-      // Exercise complete - move to next
-      if (currentExerciseIndex < totalExercises - 1) {
-        setCurrentExerciseIndex(currentExerciseIndex + 1);
-        setCurrentSet(1);
-        setPhase("ready");
-        exerciseTimer.reset(0);
-      } else {
-        // Workout complete
-        finishWorkout();
-      }
-    }
-  }
-
-  function handleNextSet() {
-    restTimer.pause();
-    setCurrentSet(currentSet + 1);
-    setPhase("ready");
-  }
-
   function skipExercise() {
     if (currentExerciseIndex < totalExercises - 1) {
-      setCurrentExerciseIndex(currentExerciseIndex + 1);
+      setCurrentExerciseIndex(i => i + 1);
       setCurrentSet(1);
       setPhase("ready");
       exerciseTimer.reset(0);
@@ -105,22 +101,12 @@ export default function WorkoutSession() {
     }
   }
 
-  function finishWorkout() {
-    const duration = Math.round((Date.now() - sessionStartTime) / 60000);
-    const caloriesBurned = workout.calories;
-    dispatch({ type: "SET_WORKOUT_DONE", value: true, calories: caloriesBurned });
-    setPhase("complete");
-    exerciseTimer.pause();
-    restTimer.pause();
-  }
-
   function quitWorkout() {
     if (window.confirm("Quit workout? Progress will not be saved.")) {
       navigate("/fitness");
     }
   }
 
-  // Complete screen
   if (phase === "complete") {
     const duration = Math.round((Date.now() - sessionStartTime) / 60000);
     return (
@@ -129,7 +115,6 @@ export default function WorkoutSession() {
           <div className="text-6xl mb-4">🎉</div>
           <h1 className="text-3xl font-bold mb-2">Workout Complete!</h1>
           <p className="text-green-200 mb-6">Amazing work! You crushed it.</p>
-          
           <div className="grid grid-cols-3 gap-3 mb-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
               <div className="text-2xl font-bold">{duration}</div>
@@ -144,7 +129,6 @@ export default function WorkoutSession() {
               <div className="text-xs text-green-200">sets done</div>
             </div>
           </div>
-
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-6 text-left">
             <h3 className="font-semibold mb-2 text-sm">Exercises Completed:</h3>
             <div className="space-y-1">
@@ -156,7 +140,6 @@ export default function WorkoutSession() {
               ))}
             </div>
           </div>
-
           <button onClick={() => navigate("/fitness")} className="w-full bg-white text-green-600 font-semibold py-3 rounded-xl hover:bg-green-50 transition-colors">
             Back to Fitness
           </button>
@@ -167,35 +150,31 @@ export default function WorkoutSession() {
 
   return (
     <div className="fixed inset-0 bg-gray-50 dark:bg-gray-950 z-50 overflow-auto">
-      {/* Header */}
       <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between z-10">
         <div className="flex-1">
           <h2 className="font-bold text-sm">{workout.name}</h2>
-          <p className="text-xs text-gray-400">Exercise {currentExerciseIndex + 1}/{totalExercises} · Set {currentSet}/{currentExercise.sets}</p>
+          <p className="text-xs text-gray-400">Exercise {currentExerciseIndex + 1}/{totalExercises} · Set {currentSet}/{currentExercise?.sets}</p>
         </div>
         <button onClick={quitWorkout} className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors">
           <X size={18} />
         </button>
       </div>
 
-      {/* Progress bar */}
       <div className="h-1 bg-gray-100 dark:bg-gray-800">
         <div className="h-full bg-gradient-to-r from-violet-500 to-purple-600 transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="max-w-2xl mx-auto p-4 pb-24">
-        {/* Exercise name & badges */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold mb-3">{currentExercise.name}</h1>
+          <h1 className="text-3xl font-bold mb-3">{currentExercise?.name}</h1>
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            <Badge color="violet">{currentExercise.sets} sets</Badge>
-            <Badge color="blue">{currentExercise.reps}</Badge>
-            {currentExercise.rest && <Badge color="orange">Rest: {currentExercise.rest}</Badge>}
+            <Badge color="violet">{currentExercise?.sets} sets</Badge>
+            <Badge color="blue">{currentExercise?.reps}</Badge>
+            {currentExercise?.rest && <Badge color="orange">Rest: {currentExercise.rest}</Badge>}
             {exerciseData.difficulty && <Badge color={exerciseData.difficulty === "Beginner" ? "green" : exerciseData.difficulty === "Intermediate" ? "yellow" : "red"}>{exerciseData.difficulty}</Badge>}
           </div>
         </div>
 
-        {/* Timer / Rest display */}
         <div className="flex justify-center mb-8">
           {phase === "rest" ? (
             <div className="text-center">
@@ -210,12 +189,11 @@ export default function WorkoutSession() {
           ) : (
             <div className="text-center">
               {(() => {
-                const reps = currentExercise.reps;
+                const reps = currentExercise?.reps || "";
                 const timeMatch = reps.match(/(\d+)\s*sec/);
                 const isTimeBased = !!timeMatch;
                 const targetSeconds = isTimeBased ? parseInt(timeMatch[1]) : 0;
                 const remainingSeconds = isTimeBased ? Math.max(0, targetSeconds - exerciseTimer.seconds) : 0;
-                
                 return (
                   <>
                     {isTimeBased && phase === "exercise" ? (
@@ -236,8 +214,8 @@ export default function WorkoutSession() {
                       </CircularProgress>
                     )}
                     <div className="mt-4">
-                      <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">Set {currentSet}/{currentExercise.sets}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{currentExercise.reps} reps</div>
+                      <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">Set {currentSet}/{currentExercise?.sets}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{currentExercise?.reps} reps</div>
                       {isTimeBased && phase === "exercise" && remainingSeconds <= 5 && remainingSeconds > 0 && (
                         <div className="text-orange-500 font-bold text-lg mt-2 animate-pulse">Almost done! {remainingSeconds}s</div>
                       )}
@@ -249,12 +227,9 @@ export default function WorkoutSession() {
           )}
         </div>
 
-        {/* Exercise details */}
         {exerciseData.instructions && (
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 mb-4 border border-gray-100 dark:border-gray-800">
-            <h3 className="font-semibold mb-3 flex items-center gap-2 text-violet-600 dark:text-violet-400">
-              <Target size={16} /> How to Perform
-            </h3>
+            <h3 className="font-semibold mb-3 flex items-center gap-2 text-violet-600 dark:text-violet-400"><Target size={16} /> How to Perform</h3>
             <ol className="space-y-2">
               {exerciseData.instructions.map((step, i) => (
                 <li key={i} className="flex items-start gap-3 text-sm">
@@ -268,14 +243,10 @@ export default function WorkoutSession() {
 
         {exerciseData.targets && (
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 mb-4 border border-gray-100 dark:border-gray-800">
-            <h3 className="font-semibold mb-3 flex items-center gap-2 text-green-600 dark:text-green-400">
-              <Flame size={16} /> Target Muscles
-            </h3>
+            <h3 className="font-semibold mb-3 flex items-center gap-2 text-green-600 dark:text-green-400"><Flame size={16} /> Target Muscles</h3>
             <div className="flex flex-wrap gap-2">
               {exerciseData.targets.map((muscle, i) => (
-                <span key={i} className="px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium">
-                  {muscle}
-                </span>
+                <span key={i} className="px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium">{muscle}</span>
               ))}
             </div>
           </div>
@@ -283,9 +254,7 @@ export default function WorkoutSession() {
 
         {exerciseData.benefits && (
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 mb-4 border border-gray-100 dark:border-gray-800">
-            <h3 className="font-semibold mb-3 flex items-center gap-2 text-blue-600 dark:text-blue-400">
-              <Lightbulb size={16} /> Benefits
-            </h3>
+            <h3 className="font-semibold mb-3 flex items-center gap-2 text-blue-600 dark:text-blue-400"><Lightbulb size={16} /> Benefits</h3>
             <ul className="space-y-2">
               {exerciseData.benefits.map((benefit, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
@@ -299,15 +268,12 @@ export default function WorkoutSession() {
 
         {exerciseData.tips && (
           <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-5 border border-orange-200 dark:border-orange-800">
-            <h3 className="font-semibold mb-2 flex items-center gap-2 text-orange-600 dark:text-orange-400">
-              <AlertCircle size={16} /> Form Tips
-            </h3>
+            <h3 className="font-semibold mb-2 flex items-center gap-2 text-orange-600 dark:text-orange-400"><AlertCircle size={16} /> Form Tips</h3>
             <p className="text-sm text-gray-700 dark:text-gray-300">{exerciseData.tips}</p>
           </div>
         )}
       </div>
 
-      {/* Bottom controls */}
       <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-4">
         <div className="max-w-2xl mx-auto">
           {phase === "ready" && (
@@ -320,7 +286,6 @@ export default function WorkoutSession() {
               </button>
             </div>
           )}
-
           {phase === "exercise" && (
             <div className="flex gap-3">
               <button onClick={() => { exerciseTimer.running ? exerciseTimer.pause() : exerciseTimer.start(); }} className="btn-secondary flex-1 flex items-center justify-center gap-2">
@@ -331,7 +296,6 @@ export default function WorkoutSession() {
               </button>
             </div>
           )}
-
           {phase === "rest" && (
             <div className="flex gap-3">
               <button onClick={() => { restTimer.running ? restTimer.pause() : restTimer.start(); }} className="btn-secondary flex-1 flex items-center justify-center gap-2">
