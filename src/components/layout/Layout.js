@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 import { LayoutDashboard, CheckSquare, Dumbbell, Moon, Activity,
-  BarChart2, Calendar, Settings, Menu, X, Sun, Zap, Bot, Utensils, Wallet,
+  BarChart2, Calendar, Settings, Menu, X, Sun, Zap, Bot, Utensils, Wallet, Download,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -22,7 +22,29 @@ const NAV_ITEMS = [
 export default function Layout({ children }) {
   const { state, dispatch } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [installed, setInstalled] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    // Pick up prompt if already fired before component mounted
+    if (window.__pwaInstallPrompt) setInstallPrompt(window.__pwaInstallPrompt);
+    const onReady = () => setInstallPrompt(window.__pwaInstallPrompt);
+    window.addEventListener("pwaInstallReady", onReady);
+    window.addEventListener("appinstalled", () => setInstalled(true));
+    return () => window.removeEventListener("pwaInstallReady", onReady);
+  }, []);
+
+  async function handleInstall() {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") {
+      setInstalled(true);
+      setInstallPrompt(null);
+      window.__pwaInstallPrompt = null;
+    }
+  }
 
   const currentPage = NAV_ITEMS.find(n => n.path === location.pathname)?.label || "Dashboard";
 
@@ -95,6 +117,14 @@ export default function Layout({ children }) {
             >
               {state.darkMode ? <Sun size={16} /> : <Moon size={16} />}
             </button>
+            {!installed && installPrompt && (
+              <button
+                onClick={handleInstall}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-xl transition-colors"
+              >
+                <Download size={13} /> Install App
+              </button>
+            )}
           </div>
         </header>
 
