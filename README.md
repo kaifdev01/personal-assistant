@@ -1,70 +1,261 @@
-# Getting Started with Create React App
+# 🚀 LifeAssist - Personal Life Assistant Web App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive productivity + fitness + spiritual life management application built with React JS, optimized for busy student-worker lifestyle.
 
-## Available Scripts
+## ✨ Features
 
-In the project directory, you can run:
+### 📊 Dashboard
+- Daily overview with motivational quotes
+- Prayer status (5 daily prayers)
+- Workout status & calories burned
+- Water intake tracker
+- Task completion score
+- Daily streaks (prayer, workout, water, tasks)
+- Quick actions for all activities
 
-### `npm start`
+### 🕌 Prayer Management
+- 5 daily prayer checklist with times
+- Prayer streak tracking (12+ days)
+- Quran reading tracker (pages/day)
+- Weekly prayer consistency stats
+- Visual progress indicators
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 💪 Gym & Fitness Assistant
+- **Live Workout Session Mode** (NEW!)
+  - Step-by-step exercise guidance
+  - Detailed instructions for each exercise
+  - Target muscles & benefits display
+  - Form tips to prevent injury
+  - Auto rest timer between sets
+  - Progress tracking (Exercise X/Y, Set X/Y)
+  - Pause/Resume/Skip controls
+  - Session completion summary
+- 4 pre-built home workout routines (HIIT, Core, Strength, Flexibility)
+- Workout & rest timers
+- Weight logging & progress tracking
+- Water intake tracker (8-16 glasses)
+- Calorie estimator
+- Heat advisory for 35-45°C weather
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### ✅ Task Management
+- Add/edit/delete tasks
+- Priority levels (high, medium, low)
+- Categories (university, work, fitness, personal)
+- Due dates
+- Productivity score calculation
+- Filter by category
+- Completion tracking
 
-### `npm test`
+### 🎯 Habit Tracker
+- 6 daily habits:
+  - Sleep tracking (7+ hours)
+  - Water intake (8 glasses)
+  - Walking (5000 steps)
+  - Workout consistency
+  - Sugar reduction
+  - Screen time goals
+- Smart input controls per habit type
+- Weekly consistency graphs
+- Habit tips for your lifestyle
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 📈 Analytics
+- Weekly overview charts (Recharts)
+- Prayer consistency area chart
+- Calories burned bar chart
+- Water intake tracking
+- Weight progress line chart
+- Task completion trends
+- Average calculations
 
-### `npm run build`
+### 📅 Schedule Planner
+- Smart daily routine timeline
+- University schedule (8 AM - 2 PM)
+- Work schedule (3 PM - 9 PM)
+- Heat-aware workout recommendations
+- Best workout windows (6-7 AM, 9-10 PM)
+- Weekly schedule view
+- Day-by-day planner
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 🤖 AI Assistant
+- Personalized workout suggestions
+- 7-day home workout plan
+- Budget-friendly meal plans (breakfast, lunch, dinner, snacks)
+- Schedule optimization tips
+- Hydration reminders
+- Motivational coaching
+- Heat & fatigue management
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### ⚙️ Settings
+- Dark/light mode toggle
+- Daily goals customization
+- Personal info (age, height, weight)
+- Activity level settings
+- Notification preferences
+- Data export (JSON)
+- Reset all data
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🛠️ Tech Stack
 
-### `npm run eject`
+- **React JS** (v18+)
+- **React Router** (v6) - Navigation
+- **Context API + useReducer** - State management
+- **localStorage** - Data persistence
+- **Tailwind CSS** - Styling
+- **Recharts** - Analytics charts
+- **Lucide React** - Icons
+- **Functional components** - Modern React patterns
+- **Custom hooks** - Reusable logic
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 📁 Project Structure
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+src/
+├── components/
+│   ├── ui/index.js              # Reusable UI components
+│   └── layout/Layout.js         # Sidebar + Header
+├── context/
+│   └── AppContext.js            # Global state management
+├── hooks/
+│   └── useStats.js              # Custom hooks
+├── data/
+│   ├── mockData.js              # Mock data
+│   └── exerciseLibrary.js       # Exercise details (NEW!)
+├── pages/
+│   ├── Dashboard.js             # Main dashboard
+│   ├── Prayer.js                # Prayer tracker
+│   ├── Fitness.js               # Fitness hub
+│   ├── WorkoutSession.js        # Live workout mode (NEW!)
+│   ├── Tasks.js                 # Task manager
+│   ├── Habits.js                # Habit tracker
+│   ├── Analytics.js             # Charts & stats
+│   ├── Schedule.js              # Daily planner
+│   ├── AIAssistant.js           # AI suggestions
+│   └── Settings.js              # App settings
+├── App.js                       # Routes
+└── index.js                     # Entry point
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🚀 Setup Instructions
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Prerequisites
+- Node.js (v14+)
+- npm or yarn
 
-## Learn More
+### Installation
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. **Navigate to project folder:**
+   ```bash
+   cd "d:\Kaif\New folder (2)\life-assistant"
+   ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. **Install dependencies** (already done):
+   ```bash
+   npm install
+   ```
 
-### Code Splitting
+3. **Start development server:**
+   ```bash
+   npm start
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+4. **Open in browser:**
+   ```
+   http://localhost:3000
+   ```
 
-### Analyzing the Bundle Size
+### Build for Production
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+npm run build
+```
 
-### Making a Progressive Web App
+Output will be in `build/` folder.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 🎨 UI Features
 
-### Advanced Configuration
+- **Glassmorphism cards** - Modern frosted glass effect
+- **Dark/light mode** - Persisted preference
+- **Mobile-first responsive** - Works on all devices
+- **Smooth animations** - Fade-in, slide-in effects
+- **Custom scrollbar** - Minimal design
+- **Circular progress** - Visual timers
+- **Progress bars** - Track completion
+- **Badges** - Color-coded labels
+- **Modal dialogs** - Clean overlays
+- **Empty states** - Helpful placeholders
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 💾 Data Persistence
 
-### Deployment
+- All data stored in **localStorage**
+- Survives page refresh
+- Auto-resets daily fields at midnight
+- Export/import functionality
+- No backend required
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🎯 Optimized For
 
-### `npm run build` fails to minify
+- **University students** (8 AM - 2 PM schedule)
+- **Part-time workers** (3 PM - 9 PM shift)
+- **Home workouts** (no gym access)
+- **Budget-conscious** (free exercises, cheap meals)
+- **Hot climate** (35-45°C heat advisories)
+- **Fat loss goals** (calorie tracking, HIIT workouts)
+- **Spiritual practice** (5 daily prayers, Quran reading)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🔥 New Workout Session Features
+
+### Exercise Library
+- **20+ exercises** with detailed info:
+  - Step-by-step instructions
+  - Target muscles (chest, core, legs, etc.)
+  - Benefits (fat burn, strength, endurance)
+  - Form tips (prevent injury)
+  - Difficulty level
+  - Calories per minute
+
+### Live Session Mode
+- Full-screen immersive experience
+- Auto-advance through exercises
+- Rest timer between sets
+- Visual progress tracking
+- Pause/Resume/Skip controls
+- Session completion summary
+- Calories burned calculation
+
+## 🌟 Future Improvements
+
+- [ ] Add custom workout builder
+- [ ] Integrate prayer time API (location-based)
+- [ ] Add workout video demonstrations
+- [ ] Social sharing (share progress)
+- [ ] Habit streak calendar view
+- [ ] Meal calorie calculator
+- [ ] Voice commands for workout
+- [ ] Progressive Web App (PWA)
+- [ ] Cloud sync (Firebase/Supabase)
+- [ ] Weekly/monthly reports
+- [ ] Achievement badges
+- [ ] Friend challenges
+
+## 📝 Notes
+
+- **No account required** - All data stored locally
+- **Privacy-first** - No data sent to servers
+- **Offline-capable** - Works without internet
+- **Zero dependencies on external APIs** - Fully self-contained
+
+## 🐛 Known Issues
+
+- None currently! 🎉
+
+## 📄 License
+
+MIT License - Free to use and modify
+
+## 👨‍💻 Developer
+
+Built with ❤️ for Kaif's busy student-worker lifestyle.
+
+---
+
+**Start your journey to discipline, consistency, and productivity today! 💪📚**
